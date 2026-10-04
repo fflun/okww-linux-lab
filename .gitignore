@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+stage/
+vendor/
+profile/
+profiles/
+configs/
+probe-state/
+live-recognition/
+*.log
+*.png
+*.jpg
+.env*
+*.pem
+*.key

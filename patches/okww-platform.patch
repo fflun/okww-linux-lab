@@ -1,0 +1,138 @@
+diff --git a/src/combat/CombatCheck.py b/src/combat/CombatCheck.py
+index 2f396c4..120fb44 100644
+--- a/src/combat/CombatCheck.py
++++ b/src/combat/CombatCheck.py
+@@ -1,7 +1,7 @@
+ import re
+ import time
+ 
+-import win32api
++from src.platform_io import wheel_cursor
+ 
+ from ok import find_boxes_by_name, Logger, calculate_color_percentage
+ from ok import find_color_rectangles, get_mask_in_color_range, is_pure_black
+@@ -220,14 +220,10 @@ class CombatCheck(BaseWWTask):
+         if not levitator:
+             self.send_key_up(self.key_config.get('Wheel Key'))
+             raise Exception('no levitator tool in the tab wheel!')
+-        old = win32api.GetCursorPos()
+-        self.move(levitator.x, levitator.y)
+-        abs_pos = self.executor.interaction.capture.get_abs_cords(levitator.x, levitator.y)
+-        win32api.SetCursorPos(abs_pos)
+-        self.sleep(0.1)
+-        self.send_key_up(self.key_config.get('Wheel Key'))
+-        self.sleep(0.2)
+-        win32api.SetCursorPos(old)
++        with wheel_cursor(self, levitator.x, levitator.y):
++            self.sleep(0.1)
++            self.send_key_up(self.key_config.get('Wheel Key'))
++            self.sleep(0.2)
+         if not self.wait_feature('edge_levitator', threshold=0.6, time_out=1):
+             if self.has_char(Roccia):
+                 if self.find_one('levitator_roccia', threshold=0.6):
+diff --git a/src/task/ChangeEchoTask.py b/src/task/ChangeEchoTask.py
+index ec5ac02..d909105 100644
+--- a/src/task/ChangeEchoTask.py
++++ b/src/task/ChangeEchoTask.py
+@@ -2,6 +2,7 @@
+ import re
+ import time
+ import os
++from src.platform_io import reveal_output_folder
+ 
+ 
+ from ok import FindFeature, Logger
+@@ -56,7 +57,7 @@ class ChangeEchoTask(BaseWWTask, FindFeature):
+                               notify=True)
+                 if self.info_get('成功声骸数量') >= 1:
+                     try:
+-                        os.startfile(os.path.abspath("screenshots"))
++                        reveal_output_folder("screenshots")
+                     except Exception as e:
+                         self.log_error(f"无法打开截图文件夹: {e}")
+                 return
+diff --git a/src/task/EnhanceEchoTask.py b/src/task/EnhanceEchoTask.py
+index ef17478..0ec9bb4 100644
+--- a/src/task/EnhanceEchoTask.py
++++ b/src/task/EnhanceEchoTask.py
+@@ -2,6 +2,7 @@
+ import re
+ import time
+ import os
++from src.platform_io import reveal_output_folder
+ 
+ from ok import FindFeature, Logger
+ from ok.feature.Box import get_bounding_box
+@@ -73,7 +74,7 @@ class EnhanceEchoTask(BaseWWTask, FindFeature):
+                               notify=True)
+                 if self.info_get('成功声骸数量') >= 1:
+                     try:
+-                        os.startfile(os.path.abspath("screenshots"))
++                        reveal_output_folder("screenshots")
+                     except Exception as e:
+                         self.log_error(f"无法打开截图文件夹: {e}")
+                 return
+diff --git a/src/task/MouseResetTask.py b/src/task/MouseResetTask.py
+index 481108d..7c1abc4 100644
+--- a/src/task/MouseResetTask.py
++++ b/src/task/MouseResetTask.py
+@@ -1,6 +1,6 @@
+ import math
+ 
+-import win32api
++from src.platform_io import desktop_cursor_available, get_desktop_cursor, set_desktop_cursor
+ 
+ from ok import TriggerTask, Logger
+ 
+@@ -22,7 +22,7 @@ class MouseResetTask(TriggerTask):
+         self.run()
+ 
+     def run(self):
+-        if not self.enabled or self.is_browser():
++        if not self.enabled or self.is_browser() or not desktop_cursor_available():
+             return
+         logger.debug('schedule mouse reset')
+         self.post_mouse_reset(0.01)
+@@ -32,10 +32,10 @@ class MouseResetTask(TriggerTask):
+             self.handler.post(self.mouse_reset, delay, remove_existing=True)
+ 
+     def mouse_reset(self):
+-        if not self.enabled or self.is_browser():
++        if not self.enabled or self.is_browser() or not desktop_cursor_available():
+             return
+         try:
+-            current_position = win32api.GetCursorPos()
++            current_position = get_desktop_cursor()
+             if self.mouse_pos and self.hwnd and self.hwnd.exists and not self.hwnd.visible and self.executor.interaction and self.executor.interaction.capture:
+                 center_pos = self.executor.interaction.capture.get_abs_cords(self.width_of_screen(0.5),
+                                                                              self.height_of_screen(0.5))
+@@ -49,7 +49,7 @@ class MouseResetTask(TriggerTask):
+                 )
+                 if distance > 200 and close_to_center:
+                     logger.info(f'move mouse back {self.mouse_pos}')
+-                    win32api.SetCursorPos(self.mouse_pos)
++                    set_desktop_cursor(self.mouse_pos)
+                     self.mouse_pos = self.mouse_pos
+                     self.post_mouse_reset(1)
+                     return
+diff --git a/src/task/WWOneTimeTask.py b/src/task/WWOneTimeTask.py
+index cf31097..176e962 100644
+--- a/src/task/WWOneTimeTask.py
++++ b/src/task/WWOneTimeTask.py
+@@ -1,4 +1,4 @@
+-from ok import BrowserInteraction, PostMessageInteraction
++from src.platform_io import desktop_cursor_available
+ from src.task.MouseResetTask import MouseResetTask
+ 
+ 
+@@ -7,6 +7,8 @@ class WWOneTimeTask:
+     def run(self):
+         mouse_reset_task = self.executor.get_task_by_class(MouseResetTask)
+         mouse_reset_task.run()
+-        if isinstance(self.executor.interaction, PostMessageInteraction):
+-            self.executor.interaction.activate()
++        if desktop_cursor_available() and not self.is_browser():
++            from ok import PostMessageInteraction
++            if isinstance(self.executor.interaction, PostMessageInteraction):
++                self.executor.interaction.activate()
+         self.sleep(0.5)

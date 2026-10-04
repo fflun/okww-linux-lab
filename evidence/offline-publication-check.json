@@ -1,0 +1,89 @@
+{
+  "game_tasks_started": 0,
+  "game_urls_opened": 0,
+  "input_events_sent": 0,
+  "affinity_vcpus": 1,
+  "browser_device_start_seconds": 4.504,
+  "browser_idle": {
+    "tree_rss_mib": 1046.03,
+    "tree_pss_mib": 527.41,
+    "processes": 12
+  },
+  "native_executor_frame": "1280x720, byte-identical synthetic pixels",
+  "input_block_verified": true,
+  "template": {
+    "engine": "native FeatureSet.find_one_feature",
+    "positive_runs": 10,
+    "negative_runs": 1,
+    "mean_ms": 227.14,
+    "max_ms": 471.59,
+    "memory": {
+      "tree_rss_mib": 1157.53,
+      "tree_pss_mib": 622.18,
+      "processes": 12
+    },
+    "roi_mean_ms": 0.59,
+    "roi_max_ms": 1.02
+  },
+  "ocr_providers": {
+    "detector": [
+      "CPUExecutionProvider"
+    ],
+    "recognizer": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "ocr_load_seconds": 1.907,
+  "ocr_loaded_memory": {
+    "tree_rss_mib": 1238.41,
+    "tree_pss_mib": 703.62,
+    "processes": 12
+  },
+  "ocr_results": [
+    {
+      "fixture": "full_clean",
+      "recognized": [
+        "领取奖励",
+        "双倍领取",
+        "兑换次数：2",
+        "结晶波片120/240",
+        "-"
+      ],
+      "runs": 3,
+      "mean_ms": 1247.16,
+      "max_ms": 1499.28
+    },
+    {
+      "fixture": "text_roi",
+      "recognized": [
+        "领取奖励",
+        "双倍领取",
+        "兑换次数：2",
+        "结晶波片120/240"
+      ],
+      "runs": 3,
+      "mean_ms": 566.23,
+      "max_ms": 574.45
+    },
+    {
+      "fixture": "blank",
+      "recognized": [],
+      "runs": 1,
+      "mean_ms": 636.68,
+      "max_ms": 636.68
+    }
+  ],
+  "final_memory": {
+    "tree_rss_mib": 1487.5,
+    "tree_pss_mib": 952.34,
+    "processes": 12
+  },
+  "blocked_page_requests": 0,
+  "status": "PASS_OFFLINE_DEVICE_OCR_TEMPLATE",
+  "peak_memory": {
+    "tree_rss_mib": 1487.5,
+    "tree_pss_mib": 952.34,
+    "processes": 13
+  },
+  "remaining_child_processes": 0
+}
